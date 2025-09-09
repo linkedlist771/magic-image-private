@@ -15,8 +15,8 @@
 
 # next.js
 /.next/
-/out/
-
+# /out/
+# 这个地方不选择删除的
 # production
 /build
 

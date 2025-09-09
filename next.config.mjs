@@ -1,5 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Uncomment the following lines for static export
+  // output: 'export',
+  // trailingSlash: true,
+  // images: {
+  //   unoptimized: true
+  // },
+  
   images: {
     remotePatterns: [
       {

@@ -1,9 +1,13 @@
 import { ApiConfig, GeneratedImage, CustomModel } from "@/types"
 
+// 硬编码的固定API URL
+const FIXED_API_URL = "https://newapi.585dg.com"
+
 const STORAGE_KEYS = {
   API_CONFIG: 'ai-drawing-api-config',
   HISTORY: 'ai-drawing-history',
-  CUSTOM_MODELS: 'ai-drawing-custom-models'
+  CUSTOM_MODELS: 'ai-drawing-custom-models',
+  LAST_SELECTED_MODEL: 'ai-drawing-last-selected-model'
 }
 
 export const storage = {
@@ -11,14 +15,19 @@ export const storage = {
   getApiConfig: (): ApiConfig | null => {
     if (typeof window === 'undefined') return null
     const data = localStorage.getItem(STORAGE_KEYS.API_CONFIG)
-    return data ? JSON.parse(data) : null
+    const config = data ? JSON.parse(data) : null
+    // 强制使用固定的API URL，无论存储中是什么
+    if (config) {
+      config.baseUrl = FIXED_API_URL
+    }
+    return config
   },
 
   setApiConfig: (key: string, baseUrl: string): void => {
     if (typeof window === 'undefined') return
     const apiConfig: ApiConfig = {
       key,
-      baseUrl,
+      baseUrl: FIXED_API_URL, // 强制使用固定的API URL
       createdAt: new Date().toISOString()
     }
     localStorage.setItem(STORAGE_KEYS.API_CONFIG, JSON.stringify(apiConfig))
@@ -84,5 +93,16 @@ export const storage = {
       models[index] = { ...models[index], ...updated }
       localStorage.setItem(STORAGE_KEYS.CUSTOM_MODELS, JSON.stringify(models))
     }
+  },
+
+  // 最后选择的模型相关操作
+  getLastSelectedModel: (): string | null => {
+    if (typeof window === 'undefined') return null
+    return localStorage.getItem(STORAGE_KEYS.LAST_SELECTED_MODEL)
+  },
+
+  setLastSelectedModel: (model: string): void => {
+    if (typeof window === 'undefined') return
+    localStorage.setItem(STORAGE_KEYS.LAST_SELECTED_MODEL, model)
   }
 } 

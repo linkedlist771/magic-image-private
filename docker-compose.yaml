@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  node-serve-front:
+    image: llinkedlist/node-serve-front:v1
+    container_name: magic_image
+    ports:
+      - "1341:1341"
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    restart: always
+    command: npx serve@latest /workspace/out -l tcp://0.0.0.0:1341

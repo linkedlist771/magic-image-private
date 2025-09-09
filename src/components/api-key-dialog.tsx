@@ -6,6 +6,9 @@ import { storage } from "@/lib/storage"
 import { Eye, EyeOff } from "lucide-react"
 import { toast } from "sonner"
 
+// 硬编码的默认API URL，用户无法修改
+const FIXED_API_URL = "https://newapi.585dg.com"
+
 interface ApiKeyDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -21,8 +24,9 @@ export function ApiKeyDialog({ open, onOpenChange }: ApiKeyDialogProps) {
     const config = storage.getApiConfig()
     if (config) {
       setKey(config.key)
-      setBaseUrl(config.baseUrl)
     }
+    // 始终使用固定的API URL，用户无法修改
+    setBaseUrl(FIXED_API_URL)
   }, [open])
 
   const validateInputs = () => {
@@ -30,9 +34,7 @@ export function ApiKeyDialog({ open, onOpenChange }: ApiKeyDialogProps) {
     if (!key.trim()) {
       newErrors.key = "请输入 API Key"
     }
-    if (!baseUrl.trim()) {
-      newErrors.baseUrl = "请输入API基础地址"
-    }
+    // API URL是硬编码的，无需验证
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -40,18 +42,8 @@ export function ApiKeyDialog({ open, onOpenChange }: ApiKeyDialogProps) {
   const handleSave = () => {
     if (!validateInputs()) return
     
-    // 确保使用HTTPS协议
-    let secureUrl = baseUrl.trim()
-    
-    // 检查URL是否以#结尾（特殊处理标记）
-    const endsWithHash = secureUrl.endsWith('#')
-    
-    if (secureUrl.startsWith('http:') && !endsWithHash) {
-      secureUrl = secureUrl.replace('http:', 'https:')
-      toast.info("为确保安全，已自动将HTTP协议转换为HTTPS")
-    }
-    
-    storage.setApiConfig(key.trim(), secureUrl)
+    // 使用固定的API URL
+    storage.setApiConfig(key.trim(), FIXED_API_URL)
     toast.success("保存成功")
     onOpenChange(false)
   }
@@ -66,23 +58,14 @@ export function ApiKeyDialog({ open, onOpenChange }: ApiKeyDialogProps) {
           <div className="space-y-2">
             <div>
               <Input
-                placeholder="请输入API基础地址，如需使用完整URL，请在末尾添加#符号"
+                placeholder="API基础地址（固定）"
                 value={baseUrl}
-                onChange={(e) => {
-                  setBaseUrl(e.target.value)
-                  setErrors(prev => ({ ...prev, baseUrl: undefined }))
-                }}
-                className={errors.baseUrl ? "border-red-500" : ""}
+                readOnly
+                className="bg-gray-50 cursor-not-allowed"
               />
-              {errors.baseUrl && (
-                <p className="text-sm text-red-500 mt-1">{errors.baseUrl}</p>
-              )}
               <div className="flex flex-col gap-1 mt-1">
-                <p className="text-xs text-amber-500">
-                  注意：在HTTPS网站中使用HTTP接口可能会被浏览器阻止，建议使用HTTPS协议
-                </p>
                 <p className="text-xs text-gray-500">
-                  默认添加API路径（如/v1/chat/completions），若URL以#结尾则使用完整输入地址
+                  API地址已固定为：{FIXED_API_URL}
                 </p>
               </div>
             </div>

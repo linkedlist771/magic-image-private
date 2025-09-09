@@ -35,7 +35,11 @@ function HomeContent() {
   const [showHistoryDialog, setShowHistoryDialog] = useState(false)
   const [showCustomModelDialog, setShowCustomModelDialog] = useState(false)
   const [prompt, setPrompt] = useState("")
-  const [model, setModel] = useState<GenerationModel>("sora_image")
+  const [model, setModel] = useState<GenerationModel>(() => {
+    // 使用存储的最后选择的模型，如果没有则默认为第一个选项
+    const lastSelected = storage.getLastSelectedModel()
+    return (lastSelected as GenerationModel) || "gemini-2.5-flash-imagen"
+  })
   const [modelType, setModelType] = useState<ModelType>(ModelType.OPENAI)
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedImages, setGeneratedImages] = useState<string[]>([])
@@ -82,51 +86,102 @@ function HomeContent() {
     // 1) 自定义模型优先：若匹配到自定义模型，则以其类型为准
     const customModels = storage.getCustomModels()
     const customModel = customModels.find(cm => cm.value === model)
-    if (customModel) {
-      setModelType(customModel.type)
-      return
-    }
+    // if (customModel) {
+    //   setModelType(customModel.type)
+    //   return
+    // }
+    // else{
+    //   // 否则全部为openai的
+    //   setModelType(ModelType.OPENAI)
+    // }
+    // 只支持这一种了
+    setModelType(ModelType.OPENAI)
 
-    // 2) 内置模型
-    if (model === 'dall-e-3' || model === 'gpt-image-1') {
-      setModelType(ModelType.DALLE)
-      return
-    }
-    if (model === 'sora_image' || model === 'gpt_4o_image') {
-      setModelType(ModelType.OPENAI)
-      return
-    }
+    // // 2) 内置模型
+    // if (model === 'dall-e-3' || model === 'gpt-image-1') {
+    //   setModelType(ModelType.DALLE)
+    //   return
+    // }
+    // if (model === 'sora_image' || model === 'gpt_4o_image') {
+    //   setModelType(ModelType.OPENAI)
+    //   return
+    // }
 
-    // 3) 启发式（仅当既不是自定义也不是内置时）
-    if (typeof model === 'string' && model.startsWith('gemini')) {
-      setModelType(ModelType.GEMINI)
-      return
-    }
+    // // 3) 启发式（仅当既不是自定义也不是内置时）
+    // if (typeof model === 'string' && model.startsWith('gemini')) {
+    //   setModelType(ModelType.GEMINI)
+    //   return
+    // }
   }, [model])
+
+  // 保存最后选择的模型
+  useEffect(() => {
+    storage.setLastSelectedModel(model)
+  }, [model])
+
+  // 添加全局粘贴事件监听器
+  useEffect(() => {
+    const handleGlobalPaste = (event: ClipboardEvent) => {
+      // 只在当前组件挂载且不是在输入框内时处理粘贴
+      const target = event.target as HTMLElement
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) {
+        return // 如果在输入框内，不处理图片粘贴
+      }
+      handlePaste(event)
+    }
+
+    document.addEventListener('paste', handleGlobalPaste)
+    return () => {
+      document.removeEventListener('paste', handleGlobalPaste)
+    }
+  }, [])
+
+  // 处理图片文件的公共逻辑
+  const processImageFile = (file: File) => {
+    if (file.size > 4 * 1024 * 1024) {
+      setError("图片大小不能超过4MB")
+      return
+    }
+
+    // 检查文件类型
+    if (!['image/jpeg', 'image/png'].includes(file.type)) {
+      setError("只支持JPG和PNG格式的图片")
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const base64 = e.target?.result as string
+      setSourceImages(prev => [...prev, base64])
+      setError("") // 清除之前的错误信息
+    }
+    reader.readAsDataURL(file)
+  }
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
     if (files && files.length > 0) {
-      Array.from(files).forEach(file => {
-        if (file.size > 4 * 1024 * 1024) {
-          setError("图片大小不能超过4MB")
-          return
-        }
-
-        // 检查文件类型
-        if (!['image/jpeg', 'image/png'].includes(file.type)) {
-          setError("只支持JPG和PNG格式的图片")
-          return
-        }
-
-        const reader = new FileReader()
-        reader.onload = (e) => {
-          const base64 = e.target?.result as string
-          setSourceImages(prev => [...prev, base64])
-        }
-        reader.readAsDataURL(file)
-      })
+      Array.from(files).forEach(processImageFile)
     }
+  }
+
+  // 处理剪贴板粘贴
+  const handlePaste = (event: ClipboardEvent) => {
+    const items = event.clipboardData?.items
+    if (!items) return
+
+    Array.from(items).forEach(item => {
+      if (item.type.startsWith('image/')) {
+        const file = item.getAsFile()
+        if (file) {
+          processImageFile(file)
+          // 显示成功提示
+          setTimeout(() => {
+            setError("")
+          }, 100)
+        }
+      }
+    })
   }
 
   const handleRemoveImage = (index: number) => {
@@ -568,6 +623,7 @@ function HomeContent() {
                         <div className="flex flex-col items-center gap-2 text-gray-500">
                           <Upload className="h-8 w-8" />
                           <p>点击上传图片或拖拽图片到这里</p>
+                          <p className="text-xs text-purple-500 font-medium">💡 或直接粘贴截图（Ctrl+V / Cmd+V）</p>
                           <p className="text-xs">仅支持JPG、PNG格式，最大4MB</p>
                           <p className="text-xs text-blue-500">可上传多张图片作为参考（最多4张）</p>
                         </div>
@@ -584,7 +640,7 @@ function HomeContent() {
                   </div>
                 )}
 
-                {isImageToImage && sourceImages.length > 0 && (model === 'dall-e-3' || model === 'gpt-image-1' || modelType === ModelType.DALLE || model === 'gemini-2.5-flash-image-preview' || modelType === ModelType.GEMINI) && (
+                {isImageToImage && sourceImages.length > 0 && (model === 'dall-e-3' || model === 'gpt-image-1' || modelType === ModelType.DALLE || model === 'gemini-2.5-flash-imagen' || modelType === ModelType.GEMINI) && (
                   <Button
                     variant="outline"
                     className="w-full"
@@ -626,11 +682,11 @@ function HomeContent() {
                         <SelectValue placeholder="选择生成模型" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="sora_image">GPT Sora_Image 模型</SelectItem>
-                        <SelectItem value="gpt_4o_image">GPT 4o_Image 模型</SelectItem>
-                        <SelectItem value="gpt-image-1">GPT Image 1 模型</SelectItem>
-                        <SelectItem value="dall-e-3">DALL-E 3 模型</SelectItem>
-                        <SelectItem value="gemini-2.5-flash-image-preview">Gemini 2.5 模型</SelectItem>
+                        <SelectItem value="gemini-2.5-flash-imagen">gemini-nano-banana</SelectItem>
+                        {/* <SelectItem value="gpt-4o-image-vip">image-vip</SelectItem> */}
+                        <SelectItem value="gemini-2.5-pro-imagen">gemini-nano-banana-pro</SelectItem>
+                        {/* <SelectItem value="nano-banana-hd">nano-banana-hd</SelectItem> */}
+                
                         
                         {/* 显示自定义模型 */}
                         {storage.getCustomModels().length > 0 && (
@@ -663,7 +719,7 @@ function HomeContent() {
                   <p className="text-xs text-gray-500">选择不同的AI模型可能会产生不同风格的图像结果</p>
                 </div>
 
-                {(model === 'dall-e-3' || model === 'gpt-image-1' || modelType === ModelType.DALLE || model === 'gemini-2.5-flash-image-preview' || modelType === ModelType.GEMINI) && (
+                {(model === 'dall-e-3' || model === 'gpt-image-1' || modelType === ModelType.DALLE || model === 'gemini-2.5-flash-imagen' || modelType === ModelType.GEMINI) && (
                   <>
                     <div className="space-y-2">
                       <h3 className="font-medium">图片尺寸</h3>
@@ -900,7 +956,7 @@ function HomeContent() {
         onSelectModel={handleSelectCustomModel}
       />
 
-      <footer className="w-full py-4 text-center text-sm text-gray-500">
+      {/* <footer className="w-full py-4 text-center text-sm text-gray-500">
         <a 
           href="https://github.com/HappyDongD/magic_image" 
           target="_blank" 
@@ -910,7 +966,7 @@ function HomeContent() {
           <Github className="h-4 w-4" />
           访问 GitHub 项目主页
         </a>
-      </footer>
+      </footer> */}
 
       <Dialog open={showImageDialog} onOpenChange={setShowImageDialog}>
         <DialogContent className="max-w-4xl">
