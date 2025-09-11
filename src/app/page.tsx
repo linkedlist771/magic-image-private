@@ -719,7 +719,7 @@ function HomeContent() {
                   <p className="text-xs text-gray-500">选择不同的AI模型可能会产生不同风格的图像结果</p>
                 </div>
 
-                {(model === 'dall-e-3' || model === 'gpt-image-1' || modelType === ModelType.DALLE || model === 'gemini-2.5-flash-imagen' || modelType === ModelType.GEMINI) && (
+                {(model === 'dall-e-3' || model === 'gpt-image-1' || modelType === ModelType.DALLE  || modelType === ModelType.GEMINI) && (
                   <>
                     <div className="space-y-2">
                       <h3 className="font-medium">图片尺寸</h3>
@@ -751,7 +751,7 @@ function HomeContent() {
                       </Select>
                     </div>
 
-                    {isImageToImage && (
+                    {/* {isImageToImage && (
                       <div className="space-y-2">
                         <h3 className="font-medium">图片质量</h3>
                         <Select 
@@ -779,10 +779,10 @@ function HomeContent() {
                           </SelectContent>
                         </Select>
                       </div>
-                    )}
+                    )} */}
                   </>
                 )}
-
+{/* 
                 {!(model === 'dall-e-3' || model === 'gpt-image-1' || modelType === ModelType.DALLE) && (
                   <div className="space-y-2">
                     <h3 className="font-medium">图片比例</h3>
@@ -797,7 +797,7 @@ function HomeContent() {
                       </SelectContent>
                     </Select>
                   </div>
-                )}
+                )} */}
 
                 <Button 
                   className="w-full" 
