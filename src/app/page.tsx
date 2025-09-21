@@ -686,7 +686,7 @@ function HomeContent() {
                         {/* <SelectItem value="gpt-4o-image-vip">image-vip</SelectItem> */}
                         <SelectItem value="gemini-2.5-pro-imagen">gemini-nano-banana-pro</SelectItem>
 
-                        <SelectItem value="gemini-2.5-flash-image-preview">gemini-2.5-flash-image-preview</SelectItem>
+                        <SelectItem value="gemini-2.5-flash-image-preview">banana</SelectItem>
 
                         {/* <SelectItem value="nano-banana-hd">nano-banana-hd</SelectItem> */}
                 
