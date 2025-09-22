@@ -682,11 +682,12 @@ function HomeContent() {
                         <SelectValue placeholder="选择生成模型" />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="gemini-2.5-flash-image-preview">banana</SelectItem>
+
                         <SelectItem value="gemini-2.5-flash-imagen">gemini-nano-banana</SelectItem>
                         {/* <SelectItem value="gpt-4o-image-vip">image-vip</SelectItem> */}
                         <SelectItem value="gemini-2.5-pro-imagen">gemini-nano-banana-pro</SelectItem>
 
-                        <SelectItem value="gemini-2.5-flash-image-preview">banana</SelectItem>
 
                         {/* <SelectItem value="nano-banana-hd">nano-banana-hd</SelectItem> */}
                 
