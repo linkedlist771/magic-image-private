@@ -38,7 +38,7 @@ function HomeContent() {
   const [model, setModel] = useState<GenerationModel>(() => {
     // 使用存储的最后选择的模型，如果没有则默认为第一个选项
     const lastSelected = storage.getLastSelectedModel()
-    return (lastSelected as GenerationModel) || "gemini-2.5-flash-imagen"
+    return (lastSelected as GenerationModel) || "gemini-2.5-flash-image-preview"
   })
   const [modelType, setModelType] = useState<ModelType>(ModelType.OPENAI)
   const [isGenerating, setIsGenerating] = useState(false)
