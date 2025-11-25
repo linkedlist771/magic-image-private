@@ -64,7 +64,7 @@ function HomeContent() {
   useEffect(() => {
     const url = searchParams.get('url')
     const apiKey = searchParams.get('apikey')
-    
+
     if (url && apiKey) {
       // 解码 URL 参数
       const decodedUrl = decodeURIComponent(url)
@@ -220,22 +220,22 @@ function HomeContent() {
 
     try {
       const isDalleModel = model === 'dall-e-3' || model === 'gpt-image-1' || modelType === ModelType.DALLE
-             const isGeminiModel = modelType === ModelType.GEMINI
-      
+      const isGeminiModel = modelType === ModelType.GEMINI
+
       // 如果有多张源图片，将它们的信息添加到提示词中
       let enhancedPrompt = prompt.trim();
       if (sourceImages.length > 1) {
         enhancedPrompt += `\n\n参考图片信息：上传了${sourceImages.length}张参考图片，第一张作为主要参考，其他图片作为额外参考。`;
       }
-      
+
       const finalPrompt = isDalleModel || isGeminiModel ? enhancedPrompt : `${enhancedPrompt}\n图片生成比例为：${aspectRatio}`
-      
+
       if (isDalleModel) {
         if (isImageToImage) {
           if (sourceImages.length === 0) {
             throw new Error('请先上传图片')
           }
-          
+
           try {
             // DALL-E API仅支持使用第一张图片进行编辑
             // 注意: 对于generateStreamImage方法，我们已添加对多图片的支持
@@ -249,7 +249,7 @@ function HomeContent() {
               mask: maskImage || undefined,
               quality
             })
-            
+
             const imageUrls = response.data.map(item => {
               // 处理DALL-E返回的URL或base64图片
               const imageUrl = item.url || item.b64_json;
@@ -259,9 +259,9 @@ function HomeContent() {
               }
               return imageUrl || ''; // 添加空字符串作为默认值
             }).filter(url => url !== ''); // 过滤掉空链接
-            
+
             setGeneratedImages(imageUrls)
-            
+
             if (imageUrls.length > 0) {
               storage.addToHistory({
                 id: uuidv4(),
@@ -288,7 +288,7 @@ function HomeContent() {
               n,
               quality
             })
-            
+
             const imageUrls = response.data.map(item => {
               // 处理DALL-E返回的URL或base64图片
               const imageUrl = item.url || item.b64_json;
@@ -298,9 +298,9 @@ function HomeContent() {
               }
               return imageUrl || ''; // 添加空字符串作为默认值
             }).filter(url => url !== ''); // 过滤掉空链接
-            
+
             setGeneratedImages(imageUrls)
-            
+
             if (imageUrls.length > 0) {
               storage.addToHistory({
                 id: uuidv4(),
@@ -324,7 +324,7 @@ function HomeContent() {
           if (sourceImages.length === 0) {
             throw new Error('请先上传图片')
           }
-          
+
           try {
             // 使用 Gemini 的图生图接口
             const response = await api.editGeminiImage({
@@ -337,7 +337,7 @@ function HomeContent() {
               mask: maskImage || undefined,
               quality
             })
-            
+
             const imageUrls = response.data.map(item => {
               // 处理 Gemini 返回的 base64 图片
               const imageUrl = item.url || item.b64_json;
@@ -347,9 +347,9 @@ function HomeContent() {
               }
               return imageUrl || ''; // 添加空字符串作为默认值
             }).filter(url => url !== ''); // 过滤掉空链接
-            
+
             setGeneratedImages(imageUrls)
-            
+
             if (imageUrls.length > 0) {
               storage.addToHistory({
                 id: uuidv4(),
@@ -377,7 +377,7 @@ function HomeContent() {
               n,
               quality
             })
-            
+
             const imageUrls = response.data.map(item => {
               // 处理 Gemini 返回的 base64 图片
               const imageUrl = item.url || item.b64_json;
@@ -387,9 +387,9 @@ function HomeContent() {
               }
               return imageUrl || ''; // 添加空字符串作为默认值
             }).filter(url => url !== ''); // 过滤掉空链接
-            
+
             setGeneratedImages(imageUrls)
-            
+
             if (imageUrls.length > 0) {
               storage.addToHistory({
                 id: uuidv4(),
@@ -489,14 +489,14 @@ function HomeContent() {
       const imageUrl = generatedImages[currentImageIndex];
       const link = document.createElement('a');
       link.href = imageUrl;
-      
+
       // 为base64图片设置合适的文件名
       if (isBase64Image(imageUrl)) {
         link.download = `generated-image-${Date.now()}.png`;
       } else {
         link.download = 'generated-image.png';
       }
-      
+
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -543,16 +543,16 @@ function HomeContent() {
             <Card className="sticky top-4">
               <CardContent className="p-4 space-y-4">
                 <div className="flex items-center gap-4">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => setShowApiKeyDialog(true)}
                   >
                     <Settings className="h-4 w-4 mr-2" />
                     密钥设置
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => setShowHistoryDialog(true)}
                   >
@@ -564,15 +564,15 @@ function HomeContent() {
                 <div className="space-y-2">
                   <h3 className="font-medium">生成模式</h3>
                   <div className="grid grid-cols-2 gap-2">
-                    <Button 
-                      variant={isImageToImage ? "outline" : "secondary"} 
+                    <Button
+                      variant={isImageToImage ? "outline" : "secondary"}
                       className="w-full"
                       onClick={() => setIsImageToImage(false)}
                     >
                       <MessageSquare className="h-4 w-4 mr-2" />
                       文生图
                     </Button>
-                    <Button 
+                    <Button
                       variant={isImageToImage ? "secondary" : "outline"}
                       className="w-full"
                       onClick={() => setIsImageToImage(true)}
@@ -586,7 +586,7 @@ function HomeContent() {
                 {isImageToImage && (
                   <div className="space-y-2">
                     <h3 className="font-medium">上传图片进行编辑</h3>
-                    <div 
+                    <div
                       className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 transition-colors"
                       onClick={() => fileInputRef.current?.click()}
                     >
@@ -655,7 +655,7 @@ function HomeContent() {
 
                 <div className="space-y-2">
                   <h3 className="font-medium">提示词</h3>
-                  <Textarea 
+                  <Textarea
                     placeholder="描述你想要生成的图像，例如：一只可爱的猫咪，柔软的毛发，大眼睛，阳光下微笑..."
                     className="min-h-[120px]"
                     value={prompt}
@@ -666,7 +666,7 @@ function HomeContent() {
                 <div className="space-y-2">
                   <h3 className="font-medium">模型选择</h3>
                   <div className="flex gap-2 mb-2">
-                    <Select 
+                    <Select
                       value={(storage.getCustomModels().some(cm => cm.value === model && cm.type === modelType)) ? `${modelType}::${model}` : model}
                       onValueChange={(value: string) => {
                         if (typeof value === 'string' && value.includes('::')) {
@@ -686,12 +686,12 @@ function HomeContent() {
 
                         <SelectItem value="gemini-2.5-flash-imagen">gemini-nano-banana</SelectItem>
                         {/* <SelectItem value="gpt-4o-image-vip">image-vip</SelectItem> */}
-                        <SelectItem value="gemini-2.5-pro-imagen">gemini-nano-banana-pro</SelectItem>
+                        <SelectItem value="gemini-3-pro-imagen">gemini-nano-banana-pro</SelectItem>
 
 
                         {/* <SelectItem value="nano-banana-hd">nano-banana-hd</SelectItem> */}
-                
-                        
+
+
                         {/* 显示自定义模型 */}
                         {storage.getCustomModels().length > 0 && (
                           <>
@@ -699,8 +699,8 @@ function HomeContent() {
                               ──── 自定义模型 ────
                             </SelectItem>
                             {storage.getCustomModels().map(customModel => (
-                              <SelectItem 
-                                key={customModel.id} 
+                              <SelectItem
+                                key={customModel.id}
                                 value={`${customModel.type}::${customModel.value}`}
                               >
                                 {customModel.name} ({customModel.type === ModelType.DALLE ? "DALL-E" : customModel.type === ModelType.GEMINI ? "Gemini" : "OpenAI"})
@@ -723,7 +723,7 @@ function HomeContent() {
                   <p className="text-xs text-gray-500">选择不同的AI模型可能会产生不同风格的图像结果</p>
                 </div>
 
-                {(model === 'dall-e-3' || model === 'gpt-image-1' || modelType === ModelType.DALLE  || modelType === ModelType.GEMINI) && (
+                {(model === 'dall-e-3' || model === 'gpt-image-1' || modelType === ModelType.DALLE || modelType === ModelType.GEMINI) && (
                   <>
                     <div className="space-y-2">
                       <h3 className="font-medium">图片尺寸</h3>
@@ -786,7 +786,7 @@ function HomeContent() {
                     )} */}
                   </>
                 )}
-{/* 
+                {/* 
                 {!(model === 'dall-e-3' || model === 'gpt-image-1' || modelType === ModelType.DALLE) && (
                   <div className="space-y-2">
                     <h3 className="font-medium">图片比例</h3>
@@ -803,15 +803,15 @@ function HomeContent() {
                   </div>
                 )} */}
 
-                <Button 
-                  className="w-full" 
+                <Button
+                  className="w-full"
                   onClick={handleGenerate}
                   disabled={isGenerating}
                 >
                   {isGenerating ? "生成中..." : isImageToImage ? "编辑图片" : "生成图片"}
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="w-full"
                   onClick={handleReset}
                 >
@@ -828,15 +828,15 @@ function HomeContent() {
                 <h2 className="text-xl font-semibold">生成结果</h2>
                 {generatedImages.length > 0 && (
                   <div className="flex items-center gap-2">
-                    <Button 
-                      size="icon" 
+                    <Button
+                      size="icon"
                       variant="ghost"
                       onClick={handleDownload}
                     >
                       <Download className="h-5 w-5" />
                     </Button>
-                    <Button 
-                      size="icon" 
+                    <Button
+                      size="icon"
                       variant="ghost"
                       onClick={() => {
                         setIsImageToImage(true)
@@ -861,7 +861,7 @@ function HomeContent() {
                       {isGenerating ? "正在生成中..." : generatedImages.length === 0 ? "等待生成..." : null}
                     </div>
                   ) : (
-                    <div 
+                    <div
                       ref={contentRef}
                       className="flex-1 overflow-y-auto rounded-lg bg-gray-50 p-4 font-mono text-sm min-h-[200px] markdown-content"
                     >
@@ -942,12 +942,12 @@ function HomeContent() {
         </div>
       </div>
 
-      <ApiKeyDialog 
-        open={showApiKeyDialog} 
-        onOpenChange={setShowApiKeyDialog} 
+      <ApiKeyDialog
+        open={showApiKeyDialog}
+        onOpenChange={setShowApiKeyDialog}
       />
-      <HistoryDialog 
-        open={showHistoryDialog} 
+      <HistoryDialog
+        open={showHistoryDialog}
         onOpenChange={setShowHistoryDialog}
         onEditImage={(imageUrl) => {
           setIsImageToImage(true)
