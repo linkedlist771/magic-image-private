@@ -35,11 +35,15 @@ function HomeContent() {
   const [showHistoryDialog, setShowHistoryDialog] = useState(false)
   const [showCustomModelDialog, setShowCustomModelDialog] = useState(false)
   const [prompt, setPrompt] = useState("")
-  const [model, setModel] = useState<GenerationModel>(() => {
-    // 使用存储的最后选择的模型，如果没有则默认为第一个选项
+  const [model, setModel] = useState<GenerationModel>("gemini-3-fast-imagen")
+  
+  // 客户端加载后从 localStorage 读取上次选择的模型
+  useEffect(() => {
     const lastSelected = storage.getLastSelectedModel()
-    return (lastSelected as GenerationModel) || "gemini-2.5-flash-image-preview"
-  })
+    if (lastSelected) {
+      setModel(lastSelected as GenerationModel)
+    }
+  }, [])
   const [modelType, setModelType] = useState<ModelType>(ModelType.OPENAI)
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedImages, setGeneratedImages] = useState<string[]>([])
@@ -640,7 +644,7 @@ function HomeContent() {
                   </div>
                 )}
 
-                {isImageToImage && sourceImages.length > 0 && (model === 'dall-e-3' || model === 'gpt-image-1' || modelType === ModelType.DALLE || model === 'gemini-2.5-flash-imagen' || modelType === ModelType.GEMINI) && (
+                {isImageToImage && sourceImages.length > 0 && (model === 'dall-e-3' || model === 'gpt-image-1' || modelType === ModelType.DALLE || model === 'gemini-3-fast-imagen' || modelType === ModelType.GEMINI) && (
                   <Button
                     variant="outline"
                     className="w-full"
@@ -682,11 +686,10 @@ function HomeContent() {
                         <SelectValue placeholder="选择生成模型" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="gemini-2.5-flash-image-preview">banana</SelectItem>
-
-                        <SelectItem value="gemini-2.5-flash-imagen">gemini-nano-banana</SelectItem>
+                        <SelectItem value="gemini-3-fast-imagen">gemini-nano-banana</SelectItem>
                         {/* <SelectItem value="gpt-4o-image-vip">image-vip</SelectItem> */}
                         <SelectItem value="gemini-3-pro-imagen">gemini-nano-banana-pro</SelectItem>
+                        <SelectItem value="gemini-3-pro-imagen-2k">gemini-3-pro-imagen-2k</SelectItem>
 
 
                         {/* <SelectItem value="nano-banana-hd">nano-banana-hd</SelectItem> */}
